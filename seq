@@ -7,25 +7,27 @@ function seq () {
     local separator=$'\n'
     local equal_width=false
 
-    local flag
-    OPTIND=1
-    while [[ ${!OPTIND} =~ ^-[^[:digit:]] ]]; do
-        getopts "f:s:w" flag || break
-        case "$flag" in
-            "f")
-                format="$OPTARG"
-            ;;
-            "s")
-                separator="$OPTARG"
-            ;;
-            "w")
-                equal_width=true
-            ;;
-        esac
+    while [[ $1 =~ ^-[^[:digit:]] ]]; do
+        if [[ $1 =~ ^(-f|--format=?)(.*) ]]; then
+            if [ -n "${BASH_REMATCH[2]}" ]; then
+                format=${BASH_REMATCH[2]}
+            else
+                shift
+                format=$1
+            fi
+        elif [[ $1 =~ ^(-s|--separator=?)(.*) ]]; then
+            if [ -n "${BASH_REMATCH[2]}" ]; then
+                separator=${BASH_REMATCH[2]}
+            else
+                shift
+                separator=$1
+            fi
+        elif [[ $1 =~ ^(-w|--equal_width) ]]; then
+            equal_width=true
+        fi
+        shift
     done
-    shift $((OPTIND-1))
-    OPTIND=1
-
+    
     local first=1
     local increment=1
     local last
